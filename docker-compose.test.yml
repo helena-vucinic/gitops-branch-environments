@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    container_name: gitops-app-test
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=test
+      - APP_ENV=test
+      - APP_MESSAGE=Application is running in TEST environment

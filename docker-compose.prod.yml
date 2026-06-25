@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    container_name: gitops-app-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - APP_ENV=production
+      - APP_MESSAGE=Application is running in PROD environment

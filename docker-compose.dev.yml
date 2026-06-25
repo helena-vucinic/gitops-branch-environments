@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    container_name: gitops-app-dev
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - APP_ENV=development
+      - APP_MESSAGE=Application is running in DEV environment
