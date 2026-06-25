@@ -1,0 +1,81 @@
+name: GitOps Branch Environment Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+      - test
+      - main
+
+  pull_request:
+    branches:
+      - test
+      - main
+
+jobs:
+  dev-environment:
+    name: DEV environment check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start DEV environment
+        run: docker compose -f docker-compose.dev.yml up --build -d
+
+      - name: Check DEV application
+        run: |
+          sleep 10
+          curl http://localhost:3001/health
+          curl http://localhost:3001/config
+
+      - name: Stop DEV environment
+        run: docker compose -f docker-compose.dev.yml down
+
+  test-environment:
+    name: TEST environment check
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'pull_request' && github.base_ref == 'test') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/test')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start TEST environment
+        run: docker compose -f docker-compose.test.yml up --build -d
+
+      - name: Check TEST application
+        run: |
+          sleep 10
+          curl http://localhost:3002/health
+          curl http://localhost:3002/config
+
+      - name: Stop TEST environment
+        run: docker compose -f docker-compose.test.yml down
+
+  prod-environment:
+    name: PROD environment check
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start PROD environment
+        run: docker compose -f docker-compose.prod.yml up --build -d
+
+      - name: Check PROD application
+        run: |
+          sleep 10
+          curl http://localhost:3000/health
+          curl http://localhost:3000/config
+
+      - name: Stop PROD environment
+        run: docker compose -f docker-compose.prod.yml down
